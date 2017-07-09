@@ -1,0 +1,87 @@
+class WC_Ya_delivery_Picpoint extends WC_Shipping_Method {
+	
+	public function __construct( $instance_id = 0 ) {
+		$this->id           = 'ya_delivery_picpoint';
+		$this->method_title = 'Яндекс.Доставка - Самовывоз';
+		$this->instance_id  = absint( $instance_id );
+		$this->supports     = array(
+			'shipping-zones',
+			'instance-settings',
+		);
+		$this->init();
+	}
+	
+	public function init() {
+		$this->init_form_fields();
+		$this->init_settings();
+		$this->enabled = $this->get_option( 'enabled' );
+		$this->title   = $this->get_option( 'title' );
+		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
+	}
+	
+	public function init_form_fields() {
+		$this->instance_form_fields = array(
+			'enabled' => array(
+				'title'   => __( 'Enable/Disable', 'woocommerce' ),
+				'type'    => 'checkbox',
+				'label'   => 'Включить Яндекс.Доставку - Самовывоз',
+				'default' => 'yes',
+			),
+			'title'   => array(
+				'title'       => __( 'Method Title', 'woocommerce' ),
+				'type'        => 'text',
+				'description' => '',
+				'default'     => 'Яндекс.Доставка - Самовывоз',
+			),
+		);
+	}
+
+	public function calculate_shipping( $package = array() ) {
+		if ( is_cart() ) {
+			return;
+		}
+		global $product;
+		$dimensions = 0;
+		$length = 0;
+		$width = 0;
+		$height = 0;
+		foreach ( $package['contents'] as $item_id => $values ) {
+			$product = $values['data'];
+			$dimensions = $dimensions +
+			              ( ( $product->length * $values['quantity'] ) * $product->width * $product->height );
+			$length = $product->length * $values['quantity'];
+			$width = $product->width * $values['quantity'];
+			$height = $product->height * $values['quantity'];
+		}
+		$default_weight = ( WC()->cart->cart_contents_weight != 0 ) ? WC()->cart->cart_contents_weight : 0.1;
+		$default_length = ( $length != 0 ) ? $length : 7;
+		$default_width = ( $width != 0 ) ? $width : 7;
+		$default_height = ( $height != 0 ) ? $height : 6;
+		$default_country = ( WC()->customer->get_default_country() == 'RU' ) ? 'Москва' : '';
+		$default_index_city = isset( $package['destination']['postcode'] ) ? $package['destination']['postcode'] : '';
+		$args          = array(
+			'city_from'       => $default_country,
+			'city_to'         => WC()->customer->get_shipping_city(),
+			'weight'          => $default_weight,
+			'length'          => $default_length,
+			'width'           => $default_width,
+			'height'          => $default_height,
+			'geo_id_to'       => '',
+			'index_city'      => $default_index_city,
+			'assessed_value'  => '',
+			'order_cost'      => '',
+			'total_cost'      => '',
+			'delivery_type'   => 'pickup',
+			'to_yd_warehouse' => '',
+		);
+		$response_body = new Ya_delivery_search_list( $args );
+		$delivery_list = $response_body->get_delivery_list_request()['data'];
+		foreach ( $delivery_list as $key ) {
+			$this->add_rate( array(
+				'id'    => $key['tariffId'],
+				'label' => $key['delivery']['name'],
+				'cost'  => $key['cost'],
+			) );
+		}
+	}
+}
