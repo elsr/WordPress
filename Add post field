@@ -1,0 +1,59 @@
+add_action( 'edit_form_after_title', 'artabr_add_post_field_title' );
+function artabr_add_post_field_title() {
+	global $post;
+	if ( get_post_type( $post ) != 'artabr-service' ) {
+		return false;
+	}
+	$value = get_post_meta( $post->ID, 'service_title', true );
+	?>
+	<style>
+		#service_title {
+			padding: 3px 8px;
+			font-size: 1.7em;
+			line-height: 100%;
+			height: 1.7em;
+			width: 100%;
+			outline: 0;
+			margin: 0 0 3px;
+			background-color: #fff;
+		}
+		
+		#service-text-label {
+			color: #72777c;
+			position: absolute;
+			font-size: 1.7em;
+			padding: 11px 10px;
+			cursor: text;
+		}
+	</style>	<label id="service-text-label" for="service_title"></label>	<input type="text" size="30"
+		value="<?php echo $value ?>" name="service_title" id="service_title"
+		placeholder="Введите заголовок карточки"/>    <?php
+}
+
+add_action( 'save_post', 'artabr_save_post_field_title' );
+function artabr_save_post_field_title( $postid ) {
+	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+		return false;
+	}
+	if ( ! current_user_can( 'edit_page', $postid ) ) {
+		return false;
+	}
+	if ( isset( $_POST['_inline_edit'] ) && wp_verify_nonce( $_POST['_inline_edit'], 'inlineeditnonce' ) ) {
+		return;
+	}
+	if ( empty( $postid ) || ( ! empty( $_POST['post_type'] ) && $_POST['post_type'] != 'artabr-service' ) ||
+	     ( ! empty( $_GET['post_type'] ) && $_GET['post_type'] != 'artabr-service' )
+	) {
+		return false;
+	}
+	$addon_service_title = sanitize_text_field( $_POST['service_title'] );
+	add_post_meta( $postid, 'service_title', $addon_service_title, true );
+	/* check if the custom field is submitted (checkboxes that aren't marked, aren't submitted) */
+	if ( isset( $addon_service_title ) ) {
+		/* store the value in the database */
+		update_post_meta( $postid, 'service_title', $addon_service_title );
+	} else {
+		/* not marked? delete the value in the database */
+		delete_post_meta( $postid, 'service_title' );
+	}
+}
