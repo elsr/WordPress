@@ -1,0 +1,10 @@
+define("DEV_DEFAULT", 0);
+define("ANDROID", 1);
+define("IOS", 2);
+function getDeviceType(){
+	$ua = strtolower($_SERVER['HTTP_USER_AGENT']);
+	if(stripos($ua,'android') !== false) { 	return ANDROID;	}
+	if(stripos($ua,'iPhone') !== false) { return IOS;}
+	if(stripos($ua,'iPad') !== false) { return IOS;	}
+	return DEV_DEFAULT;
+}
