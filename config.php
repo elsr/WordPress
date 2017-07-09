@@ -1,4 +1,7 @@
-define('DISABLE_WP_CRON', true);
+файле wp-cron.php закомментировать строку:
+//ignore_user_abort(true);
+в файл конфигурации WordPress wp-config-php добавляем строку:
+define('DISABLE_WP_CRON', 'true');
 
 
 
