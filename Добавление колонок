@@ -1,0 +1,46 @@
+/*  Подключаем и изменяем колонки в админке
+/* ------------------------------------ */	
+function art_get_featured_image($post_ID) {  
+	
+    $post_thumbnail_id = get_post_thumbnail_id($post_ID);  
+    if ($post_thumbnail_id) {  
+        $post_thumbnail_img = wp_get_attachment_image_src($post_thumbnail_id, 'thumbnail');  
+        return $post_thumbnail_img[0];  
+    }  
+} 
+
+function art_service_add_columns($my_columns){
+	unset($my_columns['date']);
+	$add_columns = array(
+		'price_service' => 'Цена',
+		'time_service' => 'Время',
+		'thumb_service' => 'Миниатюра',
+		);
+	$my_columns = array_slice( $my_columns, 0, 2, true ) + $add_columns + array_slice( $my_columns, 2, NULL, true );
+	return $my_columns;
+}
+function art_service_fill_post_columns( $column ) {
+	global $post;
+	switch ( $column ) {
+		case 'price_service':
+			echo 'от '. get_post_meta( $post->ID, 'service_price', true ).'&#8381';
+		break;
+	}
+	switch ( $column ) {
+		case 'time_service':
+			echo 'от '. get_post_meta( $post->ID, 'service_time', true ).'ч.';
+			break;
+	}
+	switch ( $column ) {
+		case 'thumb_service':
+			global $post;
+			$post_ID = $post-> ID;
+			$post_featured_image = art_get_featured_image($post_ID);  
+			if ($post_featured_image) {  
+				echo '<img width="100" src="' . $post_featured_image . '" />';  
+			} 
+			break;
+	}
+}
+add_filter( 'manage_edit-artabr-service_columns', 'art_service_add_columns', 10, 1 );
+add_action( 'manage_posts_custom_column', 'art_service_fill_post_columns', 10, 1 );
