@@ -1,0 +1,6 @@
+function artabr_menu_no_link($no_link){
+$in_link = '!<li(.*?)class="(.*?)current-menu-item(.*?)"><a(.*?)>(.*?)</a>!si';
+$out_link = '<li$1class="\\2current-menu-item\\3">$5';
+return preg_replace($in_link, $out_link, $no_link );
+}
+add_filter('wp_nav_menu', 'artabr_menu_no_link');
