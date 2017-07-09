@@ -1,0 +1,37 @@
+jQuery(document).ready(function($) {
+	$(".post__body").magnificPopup({
+	    delegate: "p a[href$='.jpg'],p a[href$='.jpeg'],p a[href$='.gif'],p a[href$='.png']",
+		type: 'image',
+		closeOnContentClick: true,
+		mainClass: 'mfp-img-mobile',
+		image: {
+			verticalFit: true
+		},
+	});
+	
+    $('.gallery').magnificPopup({
+        delegate: '.gallery-item a',
+        type: 'image',
+		tLoading: 'Loading image #%curr%...',
+		mainClass: 'mfp-img-mobile',
+		gallery: {
+			enabled: true,
+			navigateByImgClick: true,
+		},
+		
+		image: {
+			tError: '<a href="%url%">The image #%curr%</a> could not be loaded.',
+            titleSrc: function(item) {
+                var textImgGal = item.el.parents('.gallery-item').find('.wp-caption-text').html();
+                console.log(textImgGal);
+                if (textImgGal !== undefined) {
+                    return item.el.parents('.gallery-item').find('.wp-caption-text').html() + '<small>Фокусы от Моряка</small>';
+                } else {
+                    return '<small>Фокусы от Моряка</small>';
+                }
+         }
+		}
+		
+    });
+	
+});
