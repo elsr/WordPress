@@ -33,3 +33,23 @@ if ( is_active_sidebar( 'custom-header-widget' ) ) : ?>
 <?php endif; ?>
 
 Не забудьте сохранить изменения.
+
+Вкладка произвольного CSS в кастомайзере позволит вам добавить собственный CSS и сразу видеть эти изменения.
+
+div#header-widget-area {
+    width: 100%;
+    background-color: #f7f7f7;
+border-bottom:1px solid #eeeeee;
+    text-align: center;
+}
+h2.chw-title {
+    margin-top: 0px;
+    text-align: left;
+    text-transform: uppercase;
+    font-size: small;
+    background-color: #feffce;
+    width: 130px;
+    padding: 5px;
+    }
+
+
