@@ -39,3 +39,127 @@ jQuery(document).ready(function($) {
 });
 </script>
 
+
+Вариант с автоматическим определением вычислением высоты зафиксированного блока и подвала (замените id подвала на свой):
+
+<script type="text/javascript">
+function getTopOffset(e) { 
+	var y = 0;
+	do { y += e.offsetTop; } while (e = e.offsetParent);
+	return y;
+}
+var block = document.getElementById('fixblock'); /* fixblock - значение атрибута id блока */
+if ( null != block ) {
+	var topPos = getTopOffset( block );
+
+	window.onscroll = function() {
+		var scrollHeight = Math.max( document.documentElement.scrollHeight, document.documentElement.clientHeight),
+
+		    // определяем высоту рекламного блока
+		    blockHeight = block.offsetHeight,
+
+		    // вычисляем высоту подвала, footer заменить на значение атрибута id подвала
+		    footerHeight = document.getElementById('footer').offsetHeight, 	    
+
+		    // считаем позицию, до которой блок будет зафиксирован 
+		    stopPos = scrollHeight - blockHeight - footerHeight; 
+
+		var newcss = (topPos < window.pageYOffset) ? 
+			'top:20px; position: fixed;' : 'position:static;';
+
+		if ( window.pageYOffset > stopPos ) 
+			newcss = 'position:static;';
+
+		block.setAttribute( 'style', newcss );
+	}
+}
+</script>
+
+Или с точно указанной высотой (подставьте свои значения в пикселах):
+
+<script type="text/javascript">
+function getTopOffset(e) { 
+	var y = 0;
+	do { y += e.offsetTop; } while (e = e.offsetParent);
+	return y;
+}
+var block = document.getElementById('fixblock'); /* fixblock - значение атрибута id блока */
+if ( null != block ) {
+	var topPos = getTopOffset( block );
+
+	window.onscroll = function() {
+		var scrollHeight = Math.max( document.documentElement.scrollHeight, document.documentElement.clientHeight),
+
+		    // высота рекламного блока
+		    blockHeight = 400, 
+
+		    // высота подвала
+		    footerHeight =  500, 
+
+		    // считаем позицию, до которой блок будет зафиксирован 
+		    stopPos = scrollHeight - blockHeight - footerHeight; 
+
+		var newcss = (topPos < window.pageYOffset) ? 
+			'top:20px; position: fixed;' : 'position:static;';
+
+		if ( window.pageYOffset > stopPos ) 
+			newcss = 'position:static;';
+
+		block.setAttribute( 'style', newcss );
+	}
+}
+</script>
+
+
+
+
+В дочерней теме нужно добавить в файл function.php (если его нету, то создайте) фильтр для функции wp_footer().
+Вот этот код вставьте в function.php:
+function add_fixblock_script(){
+    echo <<<EOT
+<script type='text/javascript'>
+function getTopOffset(e) { 
+	var y = 0;
+	do { y += e.offsetTop; } while (e = e.offsetParent);
+	return y;
+}
+var block = document.getElementById('fixblock'); /* fixblock - значение атрибута id блока */
+if ( null != block ) {
+	var topPos = getTopOffset( block );
+	window.onscroll = function() {
+		var newcss = (topPos < window.pageYOffset) ? 
+			'top:20px; position: fixed;' : 'position:static;';
+		block.setAttribute( 'style', newcss );
+	}
+}
+</script>
+EOT;
+}
+add_action( 'wp_footer', 'add_fixblock_script' );
+
+
+или 
+
+
+
+function add_fixblock_script(){
+    echo "<script type='text/javascript'>
+jQuery(document).ready(function($) { 
+function getTopOffset(e) { 
+	var y = 0;
+	do { y += e.offsetTop; } while (e = e.offsetParent);
+	return y;
+}
+var block = document.getElementById('fixblock'), /* fixblock - значение атрибута id блока */
+    topPos = getTopOffset( block );
+    window.onscroll = function() {
+	var newcss = (topPos < window.pageYOffset) ? 'top:20px; position: fixed;' : 'position:static;';
+	block.setAttribute( 'style', newcss );
+    }
+});
+</script>";
+}
+add_action( 'wp_footer', 'add_fixblock_script' );
+
+
+http://avovkdesign.com/kak-zafiksirovat-blok-v-bokovoj-kolonke-s-pomoshhyu-javascript.html
